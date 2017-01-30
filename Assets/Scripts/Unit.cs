@@ -2,54 +2,125 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Unit : MonoBehaviour {
+public class Unit : MonoBehaviour
+{
 
     public Transform target;
+    public Grid grid;
+    public int unitID;
     float speed = 0.05f;
-    Vector3[] path;
+    List<Node> path;
     int targetIndex;
+    int layerMask;
+    IEnumerator currentCoroutine;
 
-	// Use this for initialization
-	void Start () {
-	}
+    Node tempNode;
+
+    // Use this for initialization
+    void Start()
+    {
+        int mapLayer = 8;
+        layerMask = 1 << mapLayer;
+        unitID = GetInstanceID();
+    }
 
     void FixedUpdate()
     {
-        if(Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0))
         {
-            PathFindingManager.RequestPath(transform.position, target.position, OnPathFound);
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out hit, layerMask))
+            {
+                if (hit.collider != null)
+                {
+                    Node node = grid.NodeFromWorldPoint(hit.point);
+                    PathFindingManager.RequestPath(transform.position, node.worldPosition, OnPathFound);
+                    //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), hit.point, Color.red, 100);
+                    //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), node.worldPosition, Color.blue, 100);
+                }
+            }
         }
     }
 
-    void OnPathFound(Vector3[] newPath, bool isSuccess)
+    public void StopFollowingPath()
+    {
+        StopCoroutine(currentCoroutine);
+        targetIndex = 0;
+    }
+
+    void OnPathFound(List<Node> newPath, bool isSuccess)
     {
         Debug.Log("PATH FOUND: " + isSuccess);
-        if(isSuccess)
+        if (isSuccess)
         {
             path = newPath;
-            StartCoroutine(FollowPath());
+            if (currentCoroutine == null)
+            {
+                Debug.Log("FIRST");
+                currentCoroutine = FollowPath();
+                StartCoroutine(currentCoroutine);
+            }
+            else
+            {
+                Debug.Log("SUB");
+                //PathFindingManager.ResetPathFinding();
+                targetIndex = 0;
+                StopCoroutine(currentCoroutine);
+                currentCoroutine = FollowPath();
+                StartCoroutine(currentCoroutine);
+            }
+            //StopCoroutine(FollowPath());
+            //StartCoroutine(FollowPath());
         }
     }
 
     IEnumerator FollowPath()
     {
-        Vector3 currentWaypoint = path[0];
+        Node currentWaypoint = path[0];
 
-        while(true)
+        while (true)
         {
-            if(transform.position == currentWaypoint)
+            // Debug.Log("FOLLOW PATH: " + targetIndex + " MAX : " + path.Length);
+            if (transform.position == currentWaypoint.worldPosition)
             {
+                //Debug.Log("INDEX: " + targetIndex);
                 targetIndex++;
-                if(targetIndex >= path.Length)
+                if (targetIndex >= path.Count)
                 {
+                    //Debug.Log("LENGTH: " + path.Length);
+                    tempNode = path[targetIndex - 1];
                     targetIndex = 0;
                     yield break;
                 }
                 currentWaypoint = path[targetIndex];
             }
 
-            transform.position = Vector3.MoveTowards(transform.position, currentWaypoint, speed);
+            // Debug.Log("MOVE POS: " + transform.position + " : " + currentWaypoint);
+
+            transform.position = Vector3.MoveTowards(transform.position, currentWaypoint.worldPosition, speed);
             yield return null;
+        }
+    }
+
+    void OnDrawGizmos()
+    {
+        if (tempNode != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawCube(tempNode.worldPosition, Vector3.one * (0.5f));
+            Gizmos.color = Color.black;
+            Gizmos.DrawCube(transform.position, Vector3.one * (0.5f));
+        }
+
+        if(path != null)
+        {
+            foreach(Node node in path)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawCube(node.worldPosition, Vector3.one * (0.3f));
+            }
         }
     }
 }
