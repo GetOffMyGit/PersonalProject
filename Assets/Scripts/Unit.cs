@@ -4,15 +4,16 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-
-    public Transform target;
+    
     public Grid grid;
     public int unitID;
+
     float speed = 0.05f;
     List<Node> path;
     int targetIndex;
     int layerMask;
     IEnumerator currentCoroutine;
+    Canvas unitUI;
 
     Node tempNode;
 
@@ -22,28 +23,34 @@ public class Unit : MonoBehaviour
         int mapLayer = 8;
         layerMask = 1 << mapLayer;
         unitID = GetInstanceID();
+        unitUI = GetComponent<Canvas>();
     }
 
     void FixedUpdate()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    RaycastHit hit;
+        //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-            if (Physics.Raycast(ray, out hit, layerMask))
-            {
-                if (hit.collider != null)
-                {
-                    Node node = grid.NodeFromWorldPoint(hit.point);
-                    PathFindingManager.RequestPath(transform.position, node.worldPosition, OnPathFound);
-                    //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), hit.point, Color.red, 100);
-                    //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), node.worldPosition, Color.blue, 100);
-                }
-            }
-        }
+        //    if (Physics.Raycast(ray, out hit, layerMask))
+        //    {
+        //        if (hit.collider != null)
+        //        {
+        //            Node node = grid.NodeFromWorldPoint(hit.point);
+        //            PathFindingManager.RequestPath(transform.position, node.worldPosition, OnPathFound);
+        //            //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), hit.point, Color.red, 100);
+        //            //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), node.worldPosition, Color.blue, 100);
+        //        }
+        //    }
+        //}
     }
 
+    public void DoTurn()
+    {
+
+    }
+    
     public void StopFollowingPath()
     {
         StopCoroutine(currentCoroutine);
@@ -83,7 +90,7 @@ public class Unit : MonoBehaviour
         while (true)
         {
             // Debug.Log("FOLLOW PATH: " + targetIndex + " MAX : " + path.Length);
-            if (transform.position == currentWaypoint.worldPosition)
+            if (transform.position == currentWaypoint.surfacePosition)
             {
                 //Debug.Log("INDEX: " + targetIndex);
                 targetIndex++;
@@ -99,7 +106,7 @@ public class Unit : MonoBehaviour
 
             // Debug.Log("MOVE POS: " + transform.position + " : " + currentWaypoint);
 
-            transform.position = Vector3.MoveTowards(transform.position, currentWaypoint.worldPosition, speed);
+            transform.position = Vector3.MoveTowards(transform.position, currentWaypoint.surfacePosition, speed);
             yield return null;
         }
     }
