@@ -16,6 +16,10 @@ public class Unit : MonoBehaviour
     int layerMask;
     IEnumerator currentCoroutine;
 
+    bool finishedFollowingPath;
+    bool isMoving;
+    bool moveCommandGiven;
+
     Node tempNode;
 
     // Use this for initialization
@@ -26,37 +30,45 @@ public class Unit : MonoBehaviour
         unitID = GetInstanceID();
 
         unitTurnSpeed = 1;
-
-        //foreach(Transform child in transform)
-        //{
-        //    if(child.tag.Equals("UnitMenu"))
-        //    {
-        //        unitMenu = child;
-        //    }
-        //}
+        isMoving = false;
+        finishedFollowingPath = true;
+        moveCommandGiven = false;
     }
 
     void Update()
     {
+        Debug.Log(moveCommandGiven);
         unitMenu.transform.position = transform.position;
+        if(!finishedFollowingPath)
+        {
+            CameraScript.LookAt(transform.position);
+        }
+
+        if(moveCommandGiven)
+        {
+            FinishedTurn();
+        }
     }
 
     void FixedUpdate()
     {
-        if (Input.GetMouseButtonDown(0))
+        if(isMoving)
         {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            if (Physics.Raycast(ray, out hit, layerMask))
+            if (Input.GetMouseButtonDown(0))
             {
-                if (hit.collider != null)
+                RaycastHit hit;
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                if (Physics.Raycast(ray, out hit, layerMask))
                 {
-                    Node node = grid.NodeFromWorldPoint(hit.point);
-                    CameraScript.LookAt(node.worldPosition);
-                    //PathFindingManager.RequestPath(transform.position, node.worldPosition, OnPathFound);
-                    //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), hit.point, Color.red, 100);
-                    //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), node.worldPosition, Color.blue, 100);
+                    if (hit.collider != null)
+                    {
+                        Node node = grid.NodeFromWorldPoint(hit.point);
+                        PathFindingManager.RequestPath(transform.position, node.worldPosition, OnPathFound);
+                        isMoving = false;
+                        //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), hit.point, Color.red, 100);
+                        //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), node.worldPosition, Color.blue, 100);
+                    }
                 }
             }
         }
@@ -68,8 +80,14 @@ public class Unit : MonoBehaviour
         unitMenu.gameObject.SetActive(true);
     }
 
+    public void Move()
+    {
+        isMoving = true;
+    }
+
     public void FinishedTurn()
     {
+        moveCommandGiven = false;
         unitMenu.gameObject.SetActive(false);
         TurnManager.FinishedTurn();
     }
@@ -85,6 +103,7 @@ public class Unit : MonoBehaviour
         Debug.Log("PATH FOUND: " + isSuccess);
         if (isSuccess)
         {
+            finishedFollowingPath = false;
             path = newPath;
             if (currentCoroutine == null)
             {
@@ -122,6 +141,8 @@ public class Unit : MonoBehaviour
                     //Debug.Log("LENGTH: " + path.Length);
                     tempNode = path[targetIndex - 1];
                     targetIndex = 0;
+                    finishedFollowingPath = true;
+                    moveCommandGiven = true;
                     yield break;
                 }
                 currentWaypoint = path[targetIndex];
