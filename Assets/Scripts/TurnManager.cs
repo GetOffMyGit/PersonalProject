@@ -38,6 +38,7 @@ public class TurnManager : MonoBehaviour {
             if(!isTakingTurn)
             {
                 currentUnit = GetUnitForTurn();
+                CameraScript.LookAt(currentUnit.transform.position);
                 currentUnit.DoTurn();
                 isTakingTurn = true;
             }
@@ -58,7 +59,7 @@ public class TurnManager : MonoBehaviour {
 
         foreach(Unit unit in unitsInGame)
         {
-            unitOrder[unit] -= unit.unitSpeed;
+            unitOrder[unit] -= unit.unitTurnSpeed;
             if (unitOrder[unit] < currentLowest)
             {
                 currentLowest = unitOrder[unit];

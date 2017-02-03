@@ -8,7 +8,7 @@ public class Unit : MonoBehaviour
     public Grid grid;
     public Canvas unitMenu;
     public int unitID;
-    public int unitSpeed;
+    public int unitTurnSpeed;
 
     float speed = 0.05f;
     List<Node> path;
@@ -25,7 +25,7 @@ public class Unit : MonoBehaviour
         layerMask = 1 << mapLayer;
         unitID = GetInstanceID();
 
-        unitSpeed = 1;
+        unitTurnSpeed = 1;
 
         //foreach(Transform child in transform)
         //{
@@ -43,22 +43,23 @@ public class Unit : MonoBehaviour
 
     void FixedUpdate()
     {
-        //if (Input.GetMouseButtonDown(0))
-        //{
-        //    RaycastHit hit;
-        //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Input.GetMouseButtonDown(0))
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        //    if (Physics.Raycast(ray, out hit, layerMask))
-        //    {
-        //        if (hit.collider != null)
-        //        {
-        //            Node node = grid.NodeFromWorldPoint(hit.point);
-        //            PathFindingManager.RequestPath(transform.position, node.worldPosition, OnPathFound);
-        //            //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), hit.point, Color.red, 100);
-        //            //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), node.worldPosition, Color.blue, 100);
-        //        }
-        //    }
-        //}
+            if (Physics.Raycast(ray, out hit, layerMask))
+            {
+                if (hit.collider != null)
+                {
+                    Node node = grid.NodeFromWorldPoint(hit.point);
+                    CameraScript.LookAt(node.worldPosition);
+                    //PathFindingManager.RequestPath(transform.position, node.worldPosition, OnPathFound);
+                    //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), hit.point, Color.red, 100);
+                    //Debug.DrawLine(new Vector3(-0.3f, 7.5f, -.5f), node.worldPosition, Color.blue, 100);
+                }
+            }
+        }
     }
 
     public void DoTurn()
