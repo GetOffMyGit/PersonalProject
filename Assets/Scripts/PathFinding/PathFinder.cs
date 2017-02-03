@@ -7,6 +7,7 @@ public class PathFinder : MonoBehaviour {
     public Grid grid;
     PathFindingManager pathFindingManager;
     //public Transform seeker, target;
+    Vector3[] testWayPoint;
     
 	void Awake () {
         pathFindingManager = GetComponent<PathFindingManager>();
@@ -27,7 +28,7 @@ public class PathFinder : MonoBehaviour {
         Node startNode = grid.NodeFromWorldPoint(startPos);
         Node endNode = grid.NodeFromWorldPoint(endPos);
 
-        Vector3[] wayPoints = new Vector3[0];
+        List<Node> path = new List<Node>();
         bool isSuccess = false;
 
         if (startNode.walkable && endNode.walkable)
@@ -78,10 +79,10 @@ public class PathFinder : MonoBehaviour {
 
         if(isSuccess)
         {
-            wayPoints = RetracePath(startNode, endNode);
+            path = RetracePath(startNode, endNode);
         }
 
-        pathFindingManager.FinishedProcessingPath(wayPoints, isSuccess);
+        pathFindingManager.FinishedProcessingPath(path, isSuccess);
     }
 
     int GetDistance(Node nodeA, Node nodeB)
@@ -97,7 +98,7 @@ public class PathFinder : MonoBehaviour {
         return distanceX + distanceZ + distanceY;
     }
 
-    Vector3[] RetracePath(Node startNode, Node endNode)
+    List<Node> RetracePath(Node startNode, Node endNode)
     {
         List<Node> path = new List<Node>();
         Node currentNode = endNode;
@@ -109,14 +110,27 @@ public class PathFinder : MonoBehaviour {
         }
 
         path.Reverse();
-        Vector3[] wayPoints = new Vector3[path.Count];
+        //Vector3[] wayPoints = new Vector3[path.Count];
+        //testWayPoint = wayPoints;
 
         grid.path = path;
-        for (int i = 0; i < path.Count; i++)
+        //for (int i = 0; i < path.Count; i++)
+        //{
+        //    wayPoints[i] = path[i].surfacePosition;
+        //}
+        return path;
+    }
+
+    void OnDrawGizmos()
+    {
+        if(testWayPoint != null)
         {
-            wayPoints[i] = path[i].worldPosition;
+            foreach(Vector3 waypoint in testWayPoint)
+            {
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawCube(waypoint, Vector3.one * (0.2f));
+            }
         }
-        return wayPoints;
     }
 
 }

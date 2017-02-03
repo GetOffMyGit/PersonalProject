@@ -69,7 +69,6 @@ public class Grid : MonoBehaviour
         gridSizeX = mapRenderer.bounds.size.x;
         gridSizeY = mapRenderer.bounds.size.y;
         gridSizeZ = mapRenderer.bounds.size.z;
-        Debug.Log("X:" + mapRenderer.bounds.size.x + " Y:" + mapRenderer.bounds.size.y + " Z:" + mapRenderer.bounds.size.z);
 
         gridNodeSizeX = Convert.ToInt32(Math.Floor(mapRenderer.bounds.size.x / nodeX));
         gridNodeSizeY = Convert.ToInt32(Math.Floor(mapRenderer.bounds.size.y / nodeY));
@@ -77,50 +76,6 @@ public class Grid : MonoBehaviour
 
         CreateGrid();
         CleanGridSetUp();
-
-        //Debug.Log("X:" + startingNode.GetComponent<Renderer>().bounds.size.x + " Y:" + startingNode.GetComponent<Renderer>().bounds.size.y + " Z:" + startingNode.GetComponent<Renderer>().bounds.size.z);
-        Debug.Log("X:" + nodeX + " Y:" + nodeY + " Z:" + nodeZ);
-        //Debug.Log(startingNode.transform.position);
-
-        Debug.Log("gridNodeSizeX:" + gridNodeSizeX);
-        Debug.Log("gridNodeSizeY:" + gridNodeSizeY);
-        Debug.Log("gridNodeSizeZ:" + gridNodeSizeZ);
-    }
-
-    void Update()
-    {
-        if (Input.GetMouseButton(0))
-        {
-            //Debug.Log("NODE - X: " + tempNode.gridX + " Z: " + tempNode.gridZ);
-            //List<Node> neighbours = GetNodeNeighbours(tempNode);
-            //foreach (Node node in neighbours)
-            //{
-            //    GameObject theNode = (GameObject)Instantiate(Resources.Load("Sphere"), node.worldPosition, Quaternion.identity);
-            //    Debug.Log("NODE - X: " + node.gridX + " Z: " + node.gridZ);
-            //}
-
-            //Vector3 mousePos = Input.mousePosition;
-            //Node node = NodeFromWorldPoint(mousePos);
-            //Vector3 adjustedPos = node.worldPosition;
-
-            //Vector3 bottomPoint = adjustedPos;
-            //bottomPoint.y -= gridSizeY;
-            //Vector3 topPoint = adjustedPos;
-            //topPoint.y += gridSizeY;
-
-            //RaycastHit hit;
-
-            //if (Physics.Linecast(bottomPoint, topPoint, out hit))
-            //{
-            //    if(hit.collider == null)
-            //    {
-            //        Debug.Log("NO HIT");
-            //    } else
-            //    {
-            //        Debug.Log("HIT");
-            //    }
-            //}
-        }
     }
 
     void FixedUpdate()
@@ -133,9 +88,9 @@ public class Grid : MonoBehaviour
             if (hit.collider != null)
             {
                 Vector3 hitPoint = hit.point;
-                tempBool = true;
-                Node node = NodeFromWorldPoint(hitPoint);
-                tempNode = node;
+                //tempBool = true;
+                //Node node = NodeFromWorldPoint(hitPoint);
+                //tempNode = node;
 
                 //Debug.Log("HIT");
 
@@ -174,15 +129,19 @@ public class Grid : MonoBehaviour
                     {
                         Vector3 position = hit.point;
                         int numNodesY = Mathf.CeilToInt(position.y / nodeY);
+
                         worldPoint.y = position.y;
                         //Debug.Log(hit.collider.name + " : " + hit.transform.position);
-                        if(hit.transform.tag.Equals("NodeInfo"))
+                        if (hit.transform.tag.Equals("NodeInfo"))
                         {
                             Transform hitTransform = hit.transform;
                             worldPoint.y -= hitTransform.GetComponent<Renderer>().bounds.size.y;
+                            Vector3 surfacePosition = worldPoint;
+                            surfacePosition.y = worldPoint.y + nodeYRadius;
+
                             numNodesY = Mathf.CeilToInt(worldPoint.y / nodeY);
                             NodeInfo nodeInfo = hitTransform.GetComponent<NodeInfo>();
-                            grid[x, z] = new Node(worldPoint, x, numNodesY, z, nodeInfo);
+                            grid[x, z] = new Node(worldPoint, surfacePosition, x, numNodesY, z, nodeInfo);
                         } else if (hit.transform.tag.Equals("Map"))
                         {
                             grid[x, z] = new Node(worldPoint, x, numNodesY, z, false);
@@ -192,18 +151,6 @@ public class Grid : MonoBehaviour
                 {
                     grid[x, z] = new Node(worldPoint, x, 0, z, false);
                 }
-
-                //if (Physics.Raycast(ray, out hit))
-                //{
-                //    if(hit.collider != null)
-                //    {
-                //        Debug.Log("SDFDSFSDF");
-                //        grid[x, z] = new Node(worldPoint, x, z, true);
-                //    }
-                //} else
-                //{
-                //    grid[x, z] = new Node(worldPoint, x, z, false);
-                //}
             }
         }
     }
@@ -223,6 +170,47 @@ public class Grid : MonoBehaviour
         adjustedPos = new Vector3(absX, absY, absZ);
         int x = Mathf.RoundToInt(adjustedPos.x / nodeX);
         int z = Mathf.RoundToInt(adjustedPos.z / nodeGridZDiameter);
+
+        Node initialNode = grid[x, z];
+        //float distanceX = Mathf.Pow(Math.Abs(worldPosition.x - initialNode.gridX), 2);
+        //float distanceZ = Mathf.Pow(Math.Abs(worldPosition.z - initialNode.gridZ), 2);
+
+        //float distance = (float)Math.Sqrt(distanceX + distanceZ);
+        //float distance = Vector3.Distance(worldPosition, initialNode.worldPosition);
+        Vector3 adjustedVec = worldPosition - initialNode.worldPosition;
+        adjustedVec.y = 0;
+        float distance = adjustedVec.magnitude;
+
+        //Debug.DrawLine(worldPosition, initialNode.worldPosition, Color.red, 100);
+
+        List<Node> neighbours = GetNodeNeighbours(initialNode);
+        Node closestNode = initialNode;
+        float closestDistance = distance;
+        for(int i = 0; i < neighbours.Count; i++)
+        {
+            //Debug.Log("DISTANCE: " + closestDistance);
+            //Debug.DrawLine(worldPosition, neighbours[i].worldPosition, Color.blue, 100);
+            //distanceX = Mathf.Pow(Math.Abs(worldPosition.x - neighbours[i].gridX), 2);
+            //distanceZ = Mathf.Pow(Math.Abs(worldPosition.z - neighbours[i].gridZ), 2);
+
+            //distance = (float) Math.Sqrt(distanceX + distanceZ);
+
+            //distance = Vector2.Distance(worldPosition, neighbours[i].worldPosition);
+
+            adjustedVec = worldPosition - neighbours[i].worldPosition;
+            adjustedVec.y = 0;
+
+            distance = adjustedVec.magnitude;
+            if(distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestNode = neighbours[i];
+            }
+        }
+
+        return closestNode;
+        //return closestNode;
+
         //float percentageX = (worldPosition.x + gridSizeX / 2) / gridSizeX;
         //float percentageZ = (worldPosition.z + gridSizeZ / 2) / gridSizeZ;
         //percentageX = Mathf.Clamp01(percentageX);
@@ -232,7 +220,7 @@ public class Grid : MonoBehaviour
         //int z = Mathf.RoundToInt((gridNodeSizeZ - 1) * percentageZ);
 
         //Debug.Log("percentX: " + percentageX + " percentZ: " + percentageZ);
-        return grid[x, z];
+        //return grid[x, z];
     }
 
     public List<Node> GetNodeNeighbours(Node node)
@@ -371,14 +359,14 @@ public class Grid : MonoBehaviour
                 Gizmos.DrawCube(worldPos, Vector3.one * (0.1f));
             }
 
-            if (path != null)
-            {
-                foreach (Node node in path)
-                {
-                    Gizmos.color = Color.blue;
-                    Gizmos.DrawCube(node.worldPosition, Vector3.one * (0.2f));
-                }
-            }
+            //if (path != null)
+            //{
+            //    foreach (Node node in path)
+            //    {
+            //        Gizmos.color = Color.blue;
+            //        Gizmos.DrawCube(node.worldPosition, Vector3.one * (0.2f));
+            //    }
+            //}
         }
         //Gizmos.DrawWireCube(transform.position, new Vector3(gridSizeX, gridSizeY, gridSizeZ));
         //Gizmos.color = Color.magenta;
