@@ -6,14 +6,15 @@ public class Unit : MonoBehaviour
 {
     
     public Grid grid;
+    public Canvas unitMenu;
     public int unitID;
+    public int unitSpeed;
 
     float speed = 0.05f;
     List<Node> path;
     int targetIndex;
     int layerMask;
     IEnumerator currentCoroutine;
-    Canvas unitUI;
 
     Node tempNode;
 
@@ -23,7 +24,21 @@ public class Unit : MonoBehaviour
         int mapLayer = 8;
         layerMask = 1 << mapLayer;
         unitID = GetInstanceID();
-        unitUI = GetComponent<Canvas>();
+
+        unitSpeed = 1;
+
+        //foreach(Transform child in transform)
+        //{
+        //    if(child.tag.Equals("UnitMenu"))
+        //    {
+        //        unitMenu = child;
+        //    }
+        //}
+    }
+
+    void Update()
+    {
+        unitMenu.transform.position = transform.position;
     }
 
     void FixedUpdate()
@@ -48,7 +63,14 @@ public class Unit : MonoBehaviour
 
     public void DoTurn()
     {
+        Debug.Log("SDFDSF");
+        unitMenu.gameObject.SetActive(true);
+    }
 
+    public void FinishedTurn()
+    {
+        unitMenu.gameObject.SetActive(false);
+        TurnManager.FinishedTurn();
     }
     
     public void StopFollowingPath()

@@ -36,22 +36,20 @@ public class CameraScript : MonoBehaviour {
         leftBound = mapCenter;
         leftBound.x -= mapX / 2;
         leftBound.y -= mapY / 2;
-        //leftBound.transform.position = leftBoundPos;
 
         rightBound = mapCenter;
         rightBound.x += mapX / 2;
         rightBound.y -= mapY / 2;
-        //rightBound.transform.position = rightBoundPos;
 
         topBound = mapCenter;
         topBound.z += mapZ / 2 + cameraOffSet;
         topBound.y -= mapY / 2;
-        //topBound.transform.position = topBoundPos;
 
         bottomBound = mapCenter;
         bottomBound.z -= mapZ / 2 + cameraOffSet;
         bottomBound.y -= mapY / 2;
-        //bottomBound.transform.position = bottomBoundPos;
+
+        transform.position = new Vector3(mapCenter.x, transform.position.y, transform.position.z);
 
         //bottomBoundPos = new Vector3(0, mapCenter.y - mapY / 2, mapCenter.z - mapZ / 2);
         //Vector3 bottomDirection = bottomBoundPos - mapCenter;
