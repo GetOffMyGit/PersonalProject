@@ -24,6 +24,11 @@ public class PathFindingManager : MonoBehaviour {
         instance.TryProcessNext();
     }
 
+    public static List<Node> RequestReachAbleNodes(Vector3 startPos, int unitSpeed)
+    {
+        return instance.pathFinder.GetReachableNodes(startPos, unitSpeed);
+    }
+
     void TryProcessNext()
     {
         if(!isProcessingPath && pathRequestQueue.Count > 0)

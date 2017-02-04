@@ -31,6 +31,7 @@ public class CameraScript : MonoBehaviour {
 
     Vector3 focusPoint;
     Vector3 lookDestination;
+    bool ableToMoveCamera;
 
     void Awake()
     {
@@ -71,14 +72,24 @@ public class CameraScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if(transform.position != lookDestination)
+        if (lookVecDifference(transform.position, lookDestination))
+        {
+            ableToMoveCamera = true;
+        }
+
+        //if (transform.position == lookDestination)
+        //{
+        //    ableToMoveCamera = true;
+        //}
+
+        if (!ableToMoveCamera)
         {
             transform.position = Vector3.Lerp(instance.transform.position, lookDestination, instance.cameraSpeed * Time.deltaTime);
             //instance.transform.position += difference;
-            CalculateFocusPoint();
+            //CalculateFocusPoint();
         }
 
-        if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Moved)
+        if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Moved && ableToMoveCamera)
         {
 
             Vector2 touchPreviousPos = Input.GetTouch(0).deltaPosition;
@@ -161,10 +172,10 @@ public class CameraScript : MonoBehaviour {
     void LateUpdate()
     {
     }
-
-    //Smooth transition to desired position
+    
     public static void LookAt(Vector3 lookPos)
     {
+        instance.ableToMoveCamera = false;
         instance.CalculateFocusPoint();
         Vector3 difference = new Vector3(lookPos.x - instance.focusPoint.x, 0, lookPos.z - instance.focusPoint.z);
         Vector3 destination = instance.transform.position + difference;
@@ -172,9 +183,19 @@ public class CameraScript : MonoBehaviour {
         instance.lookDestination = destination;
     }
 
+    public static bool AbleToMoveCamera()
+    {
+        return instance.ableToMoveCamera;
+    }
+
     void CalculateFocusPoint()
     {
         focusPoint = new Vector3(transform.position.x, transform.position.y - yDistance, transform.position.z + yDistance);
+    }
+
+    bool lookVecDifference(Vector3 startPos, Vector3 endPos)
+    {
+        return Vector3.SqrMagnitude(startPos - endPos) < 0.001;
     }
 
     void OnDrawGizmos()
@@ -204,11 +225,11 @@ public class CameraScript : MonoBehaviour {
         //Gizmos.DrawCube(topBound, new Vector3(1f, 1f, 1f));
         //Gizmos.DrawCube(bottomBound, new Vector3(1f, 1f, 1f));
 
-        float yDistance = transform.position.y + Math.Abs(mapCenter.y - mapY / 2);
-        Vector3 point = new Vector3(transform.position.x, transform.position.y - yDistance, transform.position.z + yDistance);
+        //float yDistance = transform.position.y + Math.Abs(mapCenter.y - mapY / 2);
+        //Vector3 point = new Vector3(transform.position.x, transform.position.y - yDistance, transform.position.z + yDistance);
         
 
-        Gizmos.DrawWireCube(new Vector3(0, transform.position.y - yDistance / 2, transform.position.z + yDistance / 2), new Vector3(1f, yDistance, yDistance));
-        Gizmos.DrawCube(focusPoint, new Vector3(1f, 1f, 1f));
+        //Gizmos.DrawWireCube(new Vector3(0, transform.position.y - yDistance / 2, transform.position.z + yDistance / 2), new Vector3(1f, yDistance, yDistance));
+        //Gizmos.DrawCube(focusPoint, new Vector3(1f, 1f, 1f));
     }
 }

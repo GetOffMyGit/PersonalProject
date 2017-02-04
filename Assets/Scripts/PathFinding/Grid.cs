@@ -17,6 +17,8 @@ public class Grid : MonoBehaviour
         }
     }
 
+    public GameObject tempGo;
+
     Node[,] grid;
 
     Vector3 startingNodePos;
@@ -136,14 +138,23 @@ public class Grid : MonoBehaviour
                         {
                             Transform hitTransform = hit.transform;
                             worldPoint.y -= hitTransform.GetComponent<Renderer>().bounds.size.y;
+
                             Vector3 surfacePosition = worldPoint;
-                            surfacePosition.y = worldPoint.y + nodeYRadius;
+                            surfacePosition.y += 0.001f;
+
+                            worldPoint.y -= nodeYRadius;
+
+                            //Instantiate(tempGo, worldPoint, tempGo.transform.rotation);
+
+                            //Vector3 surfacePosition = worldPoint;
+                            //surfacePosition.y = worldPoint.y + nodeYRadius;
 
                             numNodesY = Mathf.CeilToInt(worldPoint.y / nodeY);
                             NodeInfo nodeInfo = hitTransform.GetComponent<NodeInfo>();
                             grid[x, z] = new Node(worldPoint, surfacePosition, x, numNodesY, z, nodeInfo);
                         } else if (hit.transform.tag.Equals("Map"))
                         {
+                            Instantiate(tempGo, worldPoint, tempGo.transform.rotation);
                             grid[x, z] = new Node(worldPoint, x, numNodesY, z, false);
                         }
                     }
@@ -302,6 +313,40 @@ public class Grid : MonoBehaviour
         return neighbours;
     }
 
+    public List<Node> GetNodesInRange(int minX, int maxX, int minZ, int maxZ)
+    {
+        List<Node> checkNodes = new List<Node>();
+
+        minX = Mathf.Max(minX, 0);
+        maxX = Mathf.Min(maxX, gridNodeSizeX);
+
+        minZ = Mathf.Max(minZ, 0);
+        maxZ = Mathf.Min(maxZ, gridNodeSizeZ);
+
+        for (int x = minX; x <= maxX; x++)
+        {
+            for(int z = minZ; z <= maxZ; z++)
+            {
+                checkNodes.Add(grid[x, z]);
+            }
+        }
+
+        return checkNodes;
+    }
+
+    public Vector3 GetWorldNodeDimensions()
+    {
+        return new Vector3(gridNodeSizeX, gridNodeSizeY, gridNodeSizeZ);
+    }
+
+    public void ResetGrid()
+    {
+        foreach(Node node in grid)
+        {
+            node.gCost = 0;
+            node.hCost = 0;
+        }
+    }
 
     void OnDrawGizmos()
     {

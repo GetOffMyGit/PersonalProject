@@ -85,17 +85,74 @@ public class PathFinder : MonoBehaviour {
         pathFindingManager.FinishedProcessingPath(path, isSuccess);
     }
 
+    public List<Node> GetReachableNodes(Vector3 startPos, int unitSpeed)
+    {
+        grid.ResetGrid();
+
+        Node startNode = grid.NodeFromWorldPoint(startPos);
+
+        int minX = Mathf.Max(startNode.gridX - unitSpeed, 0);
+        int maxX = Mathf.Min(startNode.gridX + unitSpeed, (int)grid.GetWorldNodeDimensions().x);
+
+        int minZ = Mathf.Max(startNode.gridZ - unitSpeed, 0);
+        int maxZ = Mathf.Min(startNode.gridZ + unitSpeed, (int)grid.GetWorldNodeDimensions().z);
+
+        List<Node> reachableNodes = new List<Node>();
+
+        Heap<Node> openSet = new Heap<Node>(grid.maxNodeSize);
+        HashSet<Node> closedSet = new HashSet<Node>();
+
+        openSet.Add(startNode);
+
+        while (openSet.Count() > 0)
+        {
+            Node currentNode = openSet.RemoveFirst();
+            closedSet.Add(currentNode);
+
+            foreach (Node neighbour in grid.GetNodeNeighbours(currentNode))
+            {
+                if (!neighbour.walkable || closedSet.Contains(neighbour) || neighbour.gridX < minX || neighbour.gridX > maxX || neighbour.gridZ < minZ || neighbour.gridZ > maxZ)
+                {
+                    continue;
+                }
+                
+                int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
+                if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour))
+                {
+                    neighbour.gCost = newMovementCostToNeighbour;
+                    //neighbour.hCost = GetDistance(neighbour, startNode);
+                    neighbour.parent = currentNode;
+
+                    if (!openSet.Contains(neighbour))
+                    {
+                        openSet.Add(neighbour);
+                        if(neighbour.gCost <= unitSpeed)
+                        {
+                            reachableNodes.Add(neighbour);
+                        }
+                    }
+                    else
+                    {
+                        openSet.UpdateItem(neighbour);
+                    }
+                }
+            }
+        }
+        
+        return reachableNodes;
+    }
+
     int GetDistance(Node nodeA, Node nodeB)
     {
         int distanceX = Mathf.Abs(nodeA.gridX - nodeB.gridX);
         int distanceZ = Mathf.Abs(nodeA.gridZ - nodeB.gridZ);
         int distanceY = nodeB.gridY - nodeA.gridY;
-        if(distanceY < 0)
+        if (distanceY < 0)
         {
             distanceY = 0;
         }
 
-        return distanceX + distanceZ + distanceY;
+        return Mathf.Max(distanceX, distanceZ) + distanceY;
     }
 
     List<Node> RetracePath(Node startNode, Node endNode)
