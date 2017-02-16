@@ -11,6 +11,8 @@ public class Unit : MonoBehaviour
     public int unitTurnSpeed;
     public int unitMovementSpeed;
 
+    CanvasScript canvasScript;
+
     float speed = 0.05f;
     List<Node> path;
     int targetIndex;
@@ -24,9 +26,13 @@ public class Unit : MonoBehaviour
     Node tempNode;
     List<Node> reachableNodes;
 
+    Vector3 originalPos;
+
     // Use this for initialization
     void Start()
     {
+        canvasScript = unitMenu.GetComponent<CanvasScript>();
+
         int mapLayer = 8;
         layerMask = 1 << mapLayer;
         unitID = GetInstanceID();
@@ -46,10 +52,10 @@ public class Unit : MonoBehaviour
             CameraScript.LookAt(transform.position);
         }
 
-        if(moveCommandGiven)
-        {
-            FinishedTurn();
-        }
+        //if(moveCommandGiven)
+        //{
+        //    FinishedTurn();
+        //}
     }
 
     void FixedUpdate()
@@ -102,22 +108,44 @@ public class Unit : MonoBehaviour
 
     public void DoTurn()
     {
-        unitMenu.gameObject.SetActive(true);
+        canvasScript.ShowCanvas();
+        canvasScript.ShowMoveButton();
+        originalPos = transform.position;
+        //unitMenu.gameObject.SetActive(true);
     }
 
     public void Move()
     {
-        unitMenu.gameObject.SetActive(false);
+        //unitMenu.gameObject.SetActive(false);
+        canvasScript.HideCanvas();
         isMoving = true;
         reachableNodes = PathFindingManager.RequestReachAbleNodes(transform.position, unitMovementSpeed);
         HighlightManager.MoveHighlight(reachableNodes);
         //Debug.Log(tempList.Count);
     }
 
+    void PathFinished()
+    {
+        HighlightManager.DestroyMoveHighlight();
+        targetIndex = 0;
+        finishedFollowingPath = true;
+        moveCommandGiven = true;
+
+        canvasScript.ShowMoveCancel();
+    }
+
+    public void MoveCancel()
+    {
+        moveCommandGiven = false;
+        transform.position = originalPos;
+        CameraScript.LookAt(transform.position);
+        canvasScript.ShowMoveButton();
+    }
+
     public void FinishedTurn()
     {
         moveCommandGiven = false;
-        unitMenu.gameObject.SetActive(false);
+        canvasScript.HideCanvas();
         TurnManager.FinishedTurn();
     }
     
@@ -164,13 +192,7 @@ public class Unit : MonoBehaviour
                 targetIndex++;
                 if (targetIndex >= path.Count)
                 {
-                    //Debug.Log("LENGTH: " + path.Length);
-                    tempNode = path[targetIndex - 1];
-
-                    HighlightManager.DestroyMoveHighlight();
-                    targetIndex = 0;
-                    finishedFollowingPath = true;
-                    moveCommandGiven = true;
+                    PathFinished();
                     yield break;
                 }
                 currentWaypoint = path[targetIndex];
