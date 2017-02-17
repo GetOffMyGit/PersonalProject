@@ -17,8 +17,6 @@ public class Grid : MonoBehaviour
         }
     }
 
-    public GameObject tempGo;
-
     Node[,] grid;
 
     Vector3 startingNodePos;
@@ -154,7 +152,6 @@ public class Grid : MonoBehaviour
                             grid[x, z] = new Node(worldPoint, surfacePosition, x, numNodesY, z, nodeInfo);
                         } else if (hit.transform.tag.Equals("Map"))
                         {
-                            Instantiate(tempGo, worldPoint, tempGo.transform.rotation);
                             grid[x, z] = new Node(worldPoint, x, numNodesY, z, false);
                         }
                     }
