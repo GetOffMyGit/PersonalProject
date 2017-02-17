@@ -19,14 +19,22 @@ Platform assembly: D:\Users\Paul Joo\Documents\PersonalProject\test_Data\Managed
 Loading D:\Users\Paul Joo\Documents\PersonalProject\test_Data\Managed\UnityEngine.PlaymodeTestsRunner.dll into Unity Child Domain
 Platform assembly: D:\Users\Paul Joo\Documents\PersonalProject\test_Data\Managed\UnityEngine.Analytics.dll (this message is harmless)
 Loading D:\Users\Paul Joo\Documents\PersonalProject\test_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
-- Completed reload, in  0.136 seconds
+- Completed reload, in  0.023 seconds
 Platform assembly: D:\Users\Paul Joo\Documents\PersonalProject\test_Data\Managed\System.Core.dll (this message is harmless)
 Platform assembly: D:\Users\Paul Joo\Documents\PersonalProject\test_Data\Managed\System.dll (this message is harmless)
 desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
 <RI> Initialized touch support.
-UnloadTime: 0.907130 ms
+UnloadTime: 1.103458 ms
+Setting up 1 worker threads for Enlighten.
+  Thread -> id: e914 -> priority: 1 
+Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.227555 ms
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 751.
+Total: 0.296502 ms (FindLiveObjects: 0.046995 ms CreateObjectMapping: 0.017623 ms MarkObjects: 0.172212 ms  DeleteObjects: 0.058743 ms)
+
 MOVE
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
@@ -39,8 +47,6 @@ CANCEL
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-Setting up 1 worker threads for Enlighten.
-  Thread -> id: bfcc -> priority: 1 
 MOVE
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
