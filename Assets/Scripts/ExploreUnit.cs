@@ -20,6 +20,8 @@ public class ExploreUnit : MonoBehaviour
         int mapLayer = 8;
         layerMask = 1 << mapLayer;
         finishedFollowingPath = true;
+
+        CameraScript.LookAt(transform.position);
     }
 
     // Update is called once per frame

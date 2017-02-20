@@ -62,8 +62,6 @@ public class CameraScript : MonoBehaviour {
         yDistance = transform.position.y + Math.Abs(mapCenter.y - mapY / 2);
 
         focusPoint = new Vector3(transform.position.x, transform.position.y - yDistance, transform.position.z + yDistance);
-        
-        LookAt(mapCenter);
     }
 
     void Start()
